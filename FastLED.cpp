@@ -66,6 +66,7 @@ void CFastLED::show(uint8_t scale) {
 		pCur->showLeds(scale);
 		pCur->setDither(d);
 		pCur = pCur->next();
+		yield();
 	}
 	countFPS();
 }
