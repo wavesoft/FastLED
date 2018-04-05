@@ -1,6 +1,13 @@
 #define FASTLED_INTERNAL
 #include "FastLED.h"
 
+/**
+ * Forward declarations
+ */
+extern void preloop_update_frequency();
+extern void run_scheduled_functions();
+extern "C" void esp_schedule();
+extern "C" void esp_yield();
 
 #if defined(__SAM3X8E__)
 volatile uint32_t fuckit;
@@ -123,11 +130,14 @@ void CFastLED::clearData() {
 void CFastLED::delay(unsigned long ms) {
 	unsigned long start = millis();
         do {
-		// make sure to allow at least one ms to pass to ensure the clock moves
-		// forward
-		::delay(1);
-		show();
-		yield();
+	    preloop_update_frequency();
+	    // make sure to allow at least one ms to pass to ensure the clock moves
+	    // forward
+	    ::delay(1);
+	    show();
+	    run_scheduled_functions();
+	    esp_schedule();
+	    esp_yield();
 	}
 	while((millis()-start) < ms);
 }
